@@ -60,8 +60,8 @@ async def check_symbol(bot: Bot, exchange, symbol: str) -> None:
             chart_df = df_1m.tail(config.CHART_CANDLE_COUNT)
             await send_alert(bot, symbol, price, c1, c5, c1d, chart_df)
 
-    except Exception as e:
-        log.error(f"{symbol} 체크 중 오류 발생: {e}")
+    except Exception:
+    log.exception(f"{symbol} 체크 중 오류 발생")
 
 
 async def main_loop() -> None:
@@ -80,4 +80,8 @@ async def main_loop() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main_loop())
+    try:
+        asyncio.run(main_loop())
+    except Exception:
+        log.exception("치명적 오류로 봇 종료")
+        raise
