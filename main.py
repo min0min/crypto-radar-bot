@@ -1,4 +1,5 @@
 import asyncio
+import io
 import logging
 import time
 
@@ -31,9 +32,17 @@ async def send_alert(bot: Bot, symbol: str, price: float,
     label = symbol.split("/")[0]
     msg = build_alert_message(label, price, c1, c5, c1d, level)
     img_buf = generate_chart_image(chart_df, label, c1)
+    img_bytes = img_buf.getvalue()
 
-    await bot.send_photo(chat_id=config.TELEGRAM_CHAT_ID, photo=img_buf, caption=msg)
-    log.info(f"알림 전송 완료: {symbol} level={level} 1m={c1:.2f}% 5m={c5:.2f}%")
+    for chat_id in config.TELEGRAM_CHAT_IDS:
+        try:
+            # 채팅방마다 새 BytesIO로 보내야 함 (한 번 전송하면 버퍼가 소진됨)
+            photo = io.BytesIO(img_bytes)
+            await bot.send_photo(chat_id=chat_id, photo=photo, caption=msg)
+        except Exception as e:
+            log.error(f"{chat_id}로 전송 실패: {e}")
+
+    log.info(f"알림 전송 완료: {symbol} level={level} 1m={c1:.2f}% 5m={c5:.2f}% → {len(config.TELEGRAM_CHAT_IDS)}곳")
 
 
 async def check_symbol(bot: Bot, exchange, symbol: str) -> None:
@@ -56,13 +65,13 @@ async def check_symbol(bot: Bot, exchange, symbol: str) -> None:
 
 
 async def main_loop() -> None:
-    if not config.TELEGRAM_BOT_TOKEN or not config.TELEGRAM_CHAT_ID:
-        raise RuntimeError("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID 환경변수를 설정해주세요.")
+    if not config.TELEGRAM_BOT_TOKEN or not config.TELEGRAM_CHAT_IDS:
+        raise RuntimeError("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_IDS 환경변수를 설정해주세요.")
 
     bot = Bot(token=config.TELEGRAM_BOT_TOKEN)
     exchange = get_exchange()
 
-    log.info("Crypto Radar AI 봇 시작 — 감시 심볼: %s", config.SYMBOLS)
+    log.info("Crypto Radar AI 봇 시작 — 감시 심볼: %s / 전송 대상: %s", config.SYMBOLS, config.TELEGRAM_CHAT_IDS)
 
     while True:
         for symbol in config.SYMBOLS:
