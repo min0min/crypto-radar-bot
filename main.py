@@ -61,7 +61,7 @@ async def check_symbol(bot: Bot, exchange, symbol: str) -> None:
             await send_alert(bot, symbol, price, c1, c5, c1d, chart_df)
 
     except Exception:
-    log.exception(f"{symbol} 체크 중 오류 발생")
+        log.exception(f"{symbol} 체크 중 오류 발생")
 
 
 async def main_loop() -> None:
