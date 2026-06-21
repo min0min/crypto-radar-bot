@@ -2,7 +2,11 @@ import os
 
 # ── 텔레그램 설정 ─────────────────────────────────────────
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+
+# 여러 채팅방(그룹/개인)에 동시에 알림을 보내려면 쉼표(,)로 구분해서 입력
+# 예: "-5061887075,-5157895113"
+_raw_chat_ids = os.getenv("TELEGRAM_CHAT_IDS", os.getenv("TELEGRAM_CHAT_ID", ""))
+TELEGRAM_CHAT_IDS = [c.strip() for c in _raw_chat_ids.split(",") if c.strip()]
 
 # ── 감시할 심볼 (Bitget 선물(USDT-M) 기준, ccxt unified symbol) ──
 SYMBOLS = [
