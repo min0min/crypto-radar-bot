@@ -7,7 +7,8 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 # ── 감시할 심볼 (Bitget 선물(USDT-M) 기준, ccxt unified symbol) ──
 SYMBOLS = [
     "BTC/USDT:USDT",
-    # "ETH/USDT:USDT",  # 필요하면 추가
+    "ETH/USDT:USDT",
+    "SOL/USDT:USDT",
 ]
 
 # ── 변동률 감지 임계값 (%) - 이 값을 넘으면 알림 후보가 됩니다 ──
